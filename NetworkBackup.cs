@@ -1,14 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading;
 
-public class Network {
+public class NetworkBackup {
 
     private int[] layers;
     private double[][] neurons;
     private double[][] biases;
     private double[][][] weights;
-    private double[][][] oldWeights;
 
-    public Network(params int[] layers) {
+    public NetworkBackup(params int[] layers) {
 
         this.layers = layers;
 
@@ -21,20 +27,17 @@ public class Network {
         //initialize weights and biases
         var r = new Random();
         weights = new double[layers.Length - 1][][];
-        oldWeights = new double[layers.Length - 1][][];
         biases = new double[layers.Length - 1][];
         for (var i = 1; i < layers.Length; i++) {
 
             weights[i - 1] = new double[layers[i]][];
-            oldWeights[i - 1] = new double[layers[i]][];
             biases[i - 1] = new double[layers[i]];
             for (var j = 0; j < layers[i]; j++) {
 
                 weights[i - 1][j] = new double[layers[i - 1]];
-                oldWeights[i - 1][j] = new double[layers[i - 1]];
-                biases[i - 1][j] = r.NextDouble() - 0.5;
+                biases[i - 1][j] = (r.NextDouble() * 2.0 - 1.0);
                 for (var k = 0; k < layers[i - 1]; k++) {
-                    weights[i - 1][j][k] = r.NextDouble() - 0.5;
+                    weights[i - 1][j][k] = (r.NextDouble() * 2.0 - 1.0);
                 }
             }
 
@@ -78,39 +81,42 @@ public class Network {
 
     public void train(double learningRate, double[] inputs, double[] expected) {
 
-        think(inputs);
+        var output = think(inputs);
 
-        var errorBackup = default(double[]);
-        for (var i = layers.Length - 1; i > 0; i--) {
+        //update output layer
+        var outputErrors = new double[layers[layers.Length - 1]];
 
+        for (var j = 0; j < layers[layers.Length - 1]; j++) {
+
+            var error = sigmoidDerivative(output[j]) * (expected[j] - output[j]);
+
+            biases[layers.Length - 2][j] += error * learningRate;
+            for (var k = 0; k < layers[layers.Length - 2]; k++) {
+                weights[layers.Length - 2][j][k] += neurons[layers.Length - 2][k] * error * learningRate;
+            }
+            outputErrors[j] = error;
+        }
+
+        //update input & hidden (weight [layer sayısı]  [a nöron sayısı] [b nöron sayısı])
+        for (var i = layers.Length - 2; i > 0; i--) {
             var errors = new double[layers[i]];
-            for (var j = 0; j < errors.Length; j++) {
+            for (var j = 0; j < layers[i]; j++) {
 
-                var error = 0.0;
-                if (i == layers.Length - 1) {
-                    error = neurons[i][j] - expected[j];
+                var totalError = 0.0;
+                for (var k = 0; k < outputErrors.Length; k++) {
+                    totalError += outputErrors[k] * weights[i][k][j];
                 }
-                else {
-                    for (var k = 0; k < layers[i + 1]; k++) {
-                        var asd1 = oldWeights[i][k][j];
-                        var asd2 = weights[i][k][j];
+                totalError *= sigmoidDerivative(neurons[i][j]);
 
-                        error += sigmoidDerivative(neurons[i][j]) * oldWeights[i][k][j] * errorBackup[k];
-                    }
-                }
+                errors[j] = totalError;
 
-                biases[i - 1][j] -= error * learningRate;
+                biases[i - 1][j] += totalError * learningRate;
                 for (var k = 0; k < layers[i - 1]; k++) {
-                    oldWeights[i - 1][j][k] = weights[i - 1][j][k];
-                    weights[i - 1][j][k] -= sigmoidActivation(neurons[i - 1][k]) * error * learningRate;
+                    weights[i - 1][j][k] += neurons[i - 1][k] * totalError * learningRate;
                 }
-
-                errors[j] = error;
 
             }
-
-            errorBackup = errors;
-
+            outputErrors = errors;
         }
 
     }

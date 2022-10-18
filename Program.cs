@@ -4,7 +4,14 @@ public class Program {
 
     public static void Main(string[] args) {
 
-        WordGen.test();
+        //hmkcode3.Test.test();
+
+        TextGen.test();
+        //WordGen.test();
+        //Xor.test();
+
+        //ImgGen.test();
+
         Console.ReadLine();
 
     }

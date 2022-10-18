@@ -4,22 +4,22 @@ public static class Xor {
 
     public static void test() {
 
-        var nn = new Network(4, 3, 2, 3);
+        var nn = new Network(2, 2, 1);
 
         nn.train(
-            0.1,
-            1000,
+            1,
+            10000,
             new double[][] {
-                new double[] { 0, 0, 0, 0},
-                new double[] { 1, 0, 0, 0},
-                new double[] { 0, 1, 0, 0},
-                new double[] { 1, 1, 0, 0}
+                new double[] { 0, 0 },
+                new double[] { 1, 0 },
+                new double[] { 0, 1 },
+                new double[] { 1, 1 }
             },
             new double[][] {
-                new double[] { 0, 0, 0 },
-                new double[] { 1, 0, 0 },
-                new double[] { 1, 0, 0 },
-                new double[] { 0, 0, 0 }
+                new double[] { 0 },
+                new double[] { 1 },
+                new double[] { 1 },
+                new double[] { 0 }
             }
         );
 

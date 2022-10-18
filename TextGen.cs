@@ -269,8 +269,8 @@ public static class TextGen {
 
         };
 
-        var nn = new Network(size, size * 6, usedWords.Count);
-        nn.train(0.1, 10, input.ToArray(), expected.ToArray() );
+        var nn = new Network(size, size * 2, usedWords.Count);
+        nn.train(0.02, 5000, input.ToArray(), expected.ToArray() );
 
         var outputs = new List<string>();
         for (var i = 0; i < size; i++) {

@@ -47,7 +47,7 @@ public static class ImgGen {
         }
 
         var nn = new Network(9, 8, 256);
-        nn.train(0.2, 100, inputs.ToArray(), ouputs.ToArray());
+        nn.train(0.2, 10, inputs.ToArray(), ouputs.ToArray());
 
         //test
         var image3 = new Bitmap(image1.Width, image2.Height);
