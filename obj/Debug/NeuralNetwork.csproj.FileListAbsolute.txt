@@ -1,0 +1,7 @@
+C:\Users\mstsh\OneDrive\Desktop\NeuralNetwork\bin\Debug\NeuralNetwork.exe.config
+C:\Users\mstsh\OneDrive\Desktop\NeuralNetwork\bin\Debug\NeuralNetwork.exe
+C:\Users\mstsh\OneDrive\Desktop\NeuralNetwork\bin\Debug\NeuralNetwork.pdb
+C:\Users\mstsh\OneDrive\Desktop\NeuralNetwork\obj\Debug\NeuralNetwork.csproj.CoreCompileInputs.cache
+C:\Users\mstsh\OneDrive\Desktop\NeuralNetwork\obj\Debug\NeuralNetwork.exe
+C:\Users\mstsh\OneDrive\Desktop\NeuralNetwork\obj\Debug\NeuralNetwork.pdb
+C:\Users\mstsh\OneDrive\Desktop\NeuralNetwork\obj\Debug\NeuralNetwork.csprojAssemblyReference.cache
