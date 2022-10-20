@@ -29,7 +29,7 @@ public class Program {
 
     private static void xorTest() {
 
-        var nn = new Network(2, 2, 1);
+        var nn = new NeuralNetwork(2, 2, 1);
 
         nn.train(
             1,
@@ -89,8 +89,8 @@ public class Program {
 
         };
 
-        var nn = new Network(size, 5, usedWords.Count);
-        nn.train(0.25, 5000, input.ToArray(), expected.ToArray());
+        var nn = new NeuralNetwork(size, 5, usedWords.Count);
+        nn.train(0.25, 15000, input.ToArray(), expected.ToArray());
 
         var outputs = new List<string>();
         for (var i = 0; i < size; i++) {
@@ -139,7 +139,7 @@ public class Program {
 
         };
 
-        var nn = new Network(size, 8, usedWords.Count);
+        var nn = new NeuralNetwork(size, 8, usedWords.Count);
         nn.train(0.25, 5000, input.ToArray(), expected.ToArray());
 
         var outputs = "";
@@ -188,7 +188,7 @@ public class Program {
         }
 
         //train
-        var nn = new Network(32 * 32, 16, labels.Count);
+        var nn = new NeuralNetwork(32 * 32, 16, labels.Count);
         nn.train(1.0, 25, inputs.ToArray(), expecteds.ToArray());
 
         var randomIndex = Random(inputs.Count);

@@ -2,14 +2,14 @@
 using System.IO;
 using System.Text;
 
-public class Network {
+public class NeuralNetwork {
 
     private int[] layers;
     private double[][] neurons;
     private double[][] biases;
     private double[][,] weights;
 
-    public Network(params int[] layers) {
+    public NeuralNetwork(params int[] layers) {
 
         this.layers = layers;
 
