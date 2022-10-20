@@ -1,12 +1,13 @@
 ﻿using System;
+using System.IO;
+using System.Text;
 
 public class Network {
 
     private int[] layers;
     private double[][] neurons;
     private double[][] biases;
-    private double[][][] weights;
-    private double[][][] oldWeights;
+    private double[][,] weights;
 
     public Network(params int[] layers) {
 
@@ -17,25 +18,20 @@ public class Network {
             neurons[i] = new double[layers[i]];
         }
 
-        var r = new Random(1);
-        weights = new double[layers.Length - 1][][];
-        oldWeights = new double[layers.Length - 1][][];
+        weights = new double[layers.Length - 1][,];
         biases = new double[layers.Length - 1][];
         for (var i = 1; i < layers.Length; i++) {
-
-            weights[i - 1] = new double[layers[i]][];
-            oldWeights[i - 1] = new double[layers[i]][];
+            weights[i - 1] = new double[layers[i], layers[i - 1]];
             biases[i - 1] = new double[layers[i]];
-            for (var j = 0; j < layers[i]; j++) {
+        }
 
-                weights[i - 1][j] = new double[layers[i - 1]];
-                oldWeights[i - 1][j] = new double[layers[i - 1]];
-                biases[i - 1][j] = 0; // r.NextDouble() - 0.5; // * 2.0 - 1.0;
+        var random = new Random();
+        for (var i = 1; i < layers.Length; i++) {
+            for (var j = 0; j < layers[i]; j++) {
                 for (var k = 0; k < layers[i - 1]; k++) {
-                    weights[i - 1][j][k] = r.NextDouble() - 0.5;// * 2.0 - 1.0;
+                    weights[i - 1][j, k] = random.NextDouble() * 2.0 - 1.0;
                 }
             }
-
         }
 
     }
@@ -58,7 +54,7 @@ public class Network {
             for (var j = 0; j < layers[i]; j++) {
                 var value = biases[i - 1][j];
                 for (var k = 0; k < layers[i - 1]; k++) {
-                    value += neurons[i - 1][k] * weights[i - 1][j][k];
+                    value += neurons[i - 1][k] * weights[i - 1][j, k];
                 }
                 neurons[i][j] = sigmoidActivation(value);
             }
@@ -66,6 +62,10 @@ public class Network {
 
         return neurons[layers.Length - 1];
 
+    }
+
+    public void train(double learningRate, double[] inputs, double[] expected) {
+        train(learningRate, 1, new double[][] { inputs }, new double[][] { expected });
     }
 
     public void train(double learningRate, int epoch, double[][] inputs, double[][] expected) {
@@ -78,47 +78,81 @@ public class Network {
             throw new ArgumentException("Input and output size is not equal");
         }
 
-        for (var j = 0; j < epoch; j++) {
-            for (var i = 0; i < inputs.Length; i++) {
-                train(learningRate, inputs[i], expected[i]);
+        var errors = new double[layers.Length][];
+        for (var i = 0; i < layers.Length; i++) {
+            errors[i] = new double[layers[i]];
+        }
+
+        var oldWeights = new double[layers.Length - 1][,];
+        for (var i = 1; i < layers.Length; i++) {
+            oldWeights[i - 1] = new double[layers[i], layers[i - 1]];
+        }
+
+        while (epoch-- > 0) {
+            for (var t = 0; t < inputs.Length; t++) {
+
+                think(inputs[t]);
+
+                for (var i = layers.Length - 1; i > 0; i--) {
+                    for (var j = 0; j < layers[i]; j++) {
+
+                        var error = 0.0;
+                        if (i == layers.Length - 1) {
+                            error = sigmoidDerivative(neurons[i][j]) * (neurons[i][j] - expected[t][j]);
+                        }
+                        else {
+                            for (var k = 0; k < layers[i + 1]; k++) {
+                                error += sigmoidDerivative(neurons[i][j]) * (oldWeights[i][k, j] * errors[i + 1][k]);
+                            }
+                        }
+
+                        biases[i - 1][j] -= error * learningRate;
+                        for (var k = 0; k < layers[i - 1]; k++) {
+                            oldWeights[i - 1][j, k] = weights[i - 1][j, k];
+                            weights[i - 1][j, k] -= neurons[i - 1][k] * error * learningRate;
+                        }
+
+                        errors[i][j] = error;
+
+                    }
+                }
+
             }
         }
 
     }
 
-    public void train(double learningRate, double[] inputs, double[] expected) {
+    public void load(string fileName) {
+        if (File.Exists(fileName)) {
+            using (var stream = File.Open(fileName, FileMode.Open)) {
+                using (var reader = new BinaryReader(stream, Encoding.UTF8, false)) {
+                    for (var i = 0; i < layers.Length - 1; i++) {
+                        for (var j = 0; j < layers[i]; j++) {
+                            biases[i][j] = reader.ReadDouble();
+                            for (var k = 0; k < layers[i]; k++) {
+                                weights[i][j, k] = reader.ReadDouble();
+                            }
+                        }
 
-        think(inputs);
-
-        var errorBackup = default(double[]);
-        for (var i = layers.Length - 1; i > 0; i--) {
-
-            var errors = new double[layers[i]];
-            for (var j = 0; j < errors.Length; j++) {
-
-                var error = 0.0;
-                if (i == layers.Length - 1) {
-                    error = sigmoidDerivative(neurons[i][j]) * (neurons[i][j] - expected[j]);
-                }
-                else {
-                    for (var k = 0; k < layers[i + 1]; k++) {
-                        error += sigmoidDerivative(neurons[i][j]) * (oldWeights[i][k][j] * errorBackup[k]);
                     }
                 }
-
-                biases[i - 1][j] -= error * learningRate;
-                for (var k = 0; k < layers[i - 1]; k++) {
-                    oldWeights[i - 1][j][k] = weights[i - 1][j][k];
-                    weights[i - 1][j][k] -= neurons[i - 1][k] * error * learningRate;
-                }
-                errors[j] = error;
-
             }
-
-            errorBackup = errors;
-
         }
+    }
 
+    public void save(string fileName) {
+        using (var stream = File.Open(fileName, FileMode.Create)) {
+            using (var writer = new BinaryWriter(stream, Encoding.UTF8, false)) {
+                for (var i = 0; i < layers.Length - 1; i++) {
+                    for (var j = 0; j < layers[i]; j++) {
+                        writer.Write(biases[i][j]);
+                        for (var k = 0; k < layers[i]; k++) {
+                            writer.Write(weights[i][j, k]);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private double sigmoidActivation(double x) {
