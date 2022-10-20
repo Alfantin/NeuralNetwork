@@ -64,10 +64,6 @@ public class NeuralNetwork {
 
     }
 
-    public void train(double learningRate, double[] inputs, double[] expected) {
-        train(learningRate, 1, new double[][] { inputs }, new double[][] { expected });
-    }
-
     public void train(double learningRate, int epoch, double[][] inputs, double[][] expected) {
 
         if (inputs == null || expected == null) {
