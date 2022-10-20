@@ -4,13 +4,19 @@ public class Program {
 
     public static void Main(string[] args) {
 
-        //hmkcode3.Test.test();
+        //hmkcode4.Test.test();
+        Xor.test();
 
-        TextGen.test();
-        //WordGen.test();
+
+        //ImgGen.test();
+        WordGen.test();
+        //TextGen.test();
         //Xor.test();
 
         //ImgGen.test();
+
+        //Console.WriteLine("yeni");
+        //NeuralNetwork2.Test.test();
 
         Console.ReadLine();
 

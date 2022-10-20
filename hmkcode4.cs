@@ -4,28 +4,25 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace hmkcode3 {
+namespace hmkcode4 {
 
-    public class Net {
+    public class Network {
 
         private int[] layers;
         private double[][] neurons;
         private double[][] biases;
-
         public double[][][] weights;
         private double[][][] oldWeights;
 
-        public Net(params int[] layers) {
+        public Network(params int[] layers) {
 
             this.layers = layers;
 
-            //initialize neurons
             neurons = new double[layers.Length][];
             for (var i = 0; i < layers.Length; i++) {
                 neurons[i] = new double[layers[i]];
             }
 
-            //initialize weights and biases
             var r = new Random();
             weights = new double[layers.Length - 1][][];
             oldWeights = new double[layers.Length - 1][][];
@@ -87,7 +84,6 @@ namespace hmkcode3 {
 
             think(inputs);
 
-            //global error
             var errorBackup = default(double[]);
             for (var i = layers.Length - 1; i > 0; i--) {
 
@@ -104,20 +100,15 @@ namespace hmkcode3 {
                         }
                     }
 
-                    //Console.WriteLine(error);
-
-                    biases[i - 1][j] -= errors[j] * learningRate;
+                    biases[i - 1][j] -= error * learningRate;
                     for (var k = 0; k < layers[i - 1]; k++) {
                         oldWeights[i - 1][j][k] = weights[i - 1][j][k];
-                        weights[i - 1][j][k] -= sigmoidActivation(neurons[i - 1][k]) * error * learningRate;
-
-                        Console.WriteLine("W: {0:0.00}", weights[i - 1][j][k]);
-
+                        weights[i - 1][j][k] -= neurons[i - 1][k] * error * learningRate;
                     }
-
                     errors[j] = error;
 
                 }
+
                 errorBackup = errors;
 
             }
@@ -140,7 +131,7 @@ namespace hmkcode3 {
 
         public static void test() {
 
-            var nn = new Net(1, 2, 3, 4);
+            var nn = new Network(1, 2, 3, 4);
 
             nn.weights = new double[][][] {
                 new double[][]{
@@ -173,7 +164,7 @@ namespace hmkcode3 {
 
         public static void test2() {
 
-            var nn = new Net(2, 2, 1);
+            var nn = new Network(2, 2, 1);
 
             nn.weights = new double[][][] {
                 new double[][]{

@@ -1,12 +1,26 @@
-﻿                //next error
-                var nextErrors = new double[layers[layers.Length - 1]];
-                for (var k = 0; k < layers[i]; k++) {
-                    var i2 = i;
-                    var gradient = 0.0;
-                    for (var k2 = 0; k2 < layers[i2 + 1]; k2++) {
-                        gradient += derivative(neurons[i2][k]) * oldWeights[i2][k2][k] * outputErrors[k2];
-                    }
-                    nextErrors[k] = gradient;
+﻿
+                    think(inputs[i]);
 
-                }
-                outputErrors = nextErrors;
+                    for (var n = 0; n < neurons[lastLayer].Length; n++) {
+                        cost[n] = neurons[lastLayer][n] - expected[i][n];
+                        errors[lastLayer][n] = sigmoidDerivative(neurons[lastLayer][n]) * cost[n];
+                    }
+
+                    for (var l = lastLayer - 1; l > 0; l--) {
+                        for (var n = 0; n < neurons[l].Length; n++) {
+                            var sum = 0.0;
+                            for (var m = 0; m < neurons[l + 1].Length; m++) {
+                                sum += weights[l][n, m] * errors[l + 1][m];
+                            }
+                            errors[l][n] = sigmoidDerivative(neurons[l][n]) * sum;
+                        }
+                    }
+
+                    for (var l = 0; l < lastLayer; l++) {
+                        for (var k = 0; k < neurons[l + 1].Length; k++) {
+                            biases[l + 1][k] -= errors[l + 1][k] * learningRate;
+                            for (var j = 0; j < neurons[l].Length; j++) {
+                                weights[l][j, k] -= neurons[l][j] * errors[l + 1][k] * learningRate;
+                            }
+                        }
+                    }

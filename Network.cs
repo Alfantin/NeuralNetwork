@@ -12,14 +12,12 @@ public class Network {
 
         this.layers = layers;
 
-        //initialize neurons
         neurons = new double[layers.Length][];
         for (var i = 0; i < layers.Length; i++) {
             neurons[i] = new double[layers[i]];
         }
 
-        //initialize weights and biases
-        var r = new Random();
+        var r = new Random(1);
         weights = new double[layers.Length - 1][][];
         oldWeights = new double[layers.Length - 1][][];
         biases = new double[layers.Length - 1][];
@@ -32,9 +30,9 @@ public class Network {
 
                 weights[i - 1][j] = new double[layers[i - 1]];
                 oldWeights[i - 1][j] = new double[layers[i - 1]];
-                biases[i - 1][j] = r.NextDouble() - 0.5;
+                biases[i - 1][j] = 0; // r.NextDouble() - 0.5; // * 2.0 - 1.0;
                 for (var k = 0; k < layers[i - 1]; k++) {
-                    weights[i - 1][j][k] = r.NextDouble() - 0.5;
+                    weights[i - 1][j][k] = r.NextDouble() - 0.5;// * 2.0 - 1.0;
                 }
             }
 
@@ -43,6 +41,14 @@ public class Network {
     }
 
     public double[] think(params double[] inputs) {
+
+        if (inputs == null) {
+            throw new ArgumentException("Missing arguments");
+        }
+
+        if (inputs.Length != layers[0]) {
+            throw new ArgumentException("Input size is wrong");
+        }
 
         for (var i = 0; i < inputs.Length; i++) {
             neurons[0][i] = inputs[i];
@@ -62,18 +68,22 @@ public class Network {
 
     }
 
-    public void train(double learningRate, int count, double[][] inputs, double[][] expected) {
+    public void train(double learningRate, int epoch, double[][] inputs, double[][] expected) {
+
         if (inputs == null || expected == null) {
             throw new ArgumentException("Missing arguments");
         }
+
         if (inputs.Length != expected.Length) {
             throw new ArgumentException("Input and output size is not equal");
         }
-        for (var j = 0; j < count; j++) {
+
+        for (var j = 0; j < epoch; j++) {
             for (var i = 0; i < inputs.Length; i++) {
                 train(learningRate, inputs[i], expected[i]);
             }
         }
+
     }
 
     public void train(double learningRate, double[] inputs, double[] expected) {
@@ -88,23 +98,19 @@ public class Network {
 
                 var error = 0.0;
                 if (i == layers.Length - 1) {
-                    error = neurons[i][j] - expected[j];
+                    error = sigmoidDerivative(neurons[i][j]) * (neurons[i][j] - expected[j]);
                 }
                 else {
                     for (var k = 0; k < layers[i + 1]; k++) {
-                        var asd1 = oldWeights[i][k][j];
-                        var asd2 = weights[i][k][j];
-
-                        error += sigmoidDerivative(neurons[i][j]) * oldWeights[i][k][j] * errorBackup[k];
+                        error += sigmoidDerivative(neurons[i][j]) * (oldWeights[i][k][j] * errorBackup[k]);
                     }
                 }
 
                 biases[i - 1][j] -= error * learningRate;
                 for (var k = 0; k < layers[i - 1]; k++) {
                     oldWeights[i - 1][j][k] = weights[i - 1][j][k];
-                    weights[i - 1][j][k] -= sigmoidActivation(neurons[i - 1][k]) * error * learningRate;
+                    weights[i - 1][j][k] -= neurons[i - 1][k] * error * learningRate;
                 }
-
                 errors[j] = error;
 
             }

@@ -8,7 +8,7 @@ public static class Xor {
 
         nn.train(
             1,
-            10000,
+            5000,
             new double[][] {
                 new double[] { 0, 0 },
                 new double[] { 1, 0 },
