@@ -3,7 +3,6 @@
 .vs/
 .consulo/
 *.csproj
-*.sln
 *.suo
 *.tmp
 *.user
